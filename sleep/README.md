@@ -1,15 +1,9 @@
 # Sleep Logs API Documentation
 
 ## RUN ##
-To run the app is needed to checkout to the feature/retrieve-average branch
+To run the app is needed to clone the project and run the docker compose
 
-git clone feature/retrieve-average https://github.com/gabrielgondin/noom-sleep.git
-git checkout feature/retrieve-average 
-
-or
-
-git clone --single-branch --branch feature/retrieve-average https://github.com/gabrielgondin/noom-sleep.git
-
+git clone https://github.com/gabrielgondin/noom-sleep.git
 docker compose up -d
 
 ## Endpoints
