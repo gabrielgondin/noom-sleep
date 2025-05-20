@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
-import org.springframework.web.client.HttpClientErrorException
 import org.slf4j.LoggerFactory
 
 
@@ -14,14 +13,13 @@ class SleepExceptionHandler {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    @ExceptionHandler(HttpClientErrorException.NotFound::class)
-    fun handleNotFoundException(ex: HttpClientErrorException.NotFound): ResponseEntity<ErrorResponse> {
-        logger.error(ex.message)
+    @ExceptionHandler(SleepLogNotFoundException::class)
+    fun handleNotFoundException(ex: SleepLogNotFoundException): ResponseEntity<ErrorResponse> {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body(ErrorResponse(
-                code = HttpStatus.NOT_FOUND.toString(),
-                message = "Resource not found"
+                code = HttpStatus.NOT_FOUND.value().toString(),
+                message = ex.message
             ))
     }
 
@@ -31,7 +29,7 @@ class SleepExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
             .body(ErrorResponse(
-                code = HttpStatus.CONFLICT.toString(),
+                code = HttpStatus.CONFLICT.value().toString(),
                 message = "Sleep data has already been recorded for this period"
             ))
     }
@@ -42,7 +40,7 @@ class SleepExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
             .body(ErrorResponse(
-                code = HttpStatus.CONFLICT.toString(),
+                code = HttpStatus.CONFLICT.value().toString(),
                 message = "Conflict to save data"
             ))
     }
