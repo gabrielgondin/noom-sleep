@@ -5,12 +5,13 @@ import org.springframework.format.annotation.DateTimeFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class CreateSleepRequest(
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE, fallbackPatterns = ["HH:mm:ss"])
+data class CreateSleepLogRequest(
+    val userId: Long,
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     val day: LocalDate = LocalDate.now(),
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME, fallbackPatterns = ["yyyy-MM-dd HH:mm:ss"])
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     val startAt: LocalDateTime,
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME, fallbackPatterns = ["yyyy-MM-dd HH:mm:ss"])
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     val endAt: LocalDateTime,
     val mood: SleepMoodEnum
 )

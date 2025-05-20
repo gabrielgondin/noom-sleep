@@ -1,8 +1,10 @@
 package com.noom.interview.fullstack.sleep.application.api
 
 import com.noom.interview.fullstack.sleep.SleepApplication.Companion.UNIT_TEST_PROFILE
-import com.noom.interview.fullstack.sleep.domain.sleep.Sleep
-import com.noom.interview.fullstack.sleep.domain.sleep.SleepRepository
+import com.noom.interview.fullstack.sleep.domain.sleep.SleepLog
+import com.noom.interview.fullstack.sleep.domain.sleep.SleepLogRepository
+import com.noom.interview.fullstack.sleep.domain.sleep.User
+import com.noom.interview.fullstack.sleep.domain.sleep.UserRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.any
@@ -17,7 +19,8 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.Optional
 
 @SpringBootTest
 @ActiveProfiles(UNIT_TEST_PROFILE)
@@ -28,7 +31,10 @@ class SleepsControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockBean
-    private lateinit var sleepRepository: SleepRepository
+    private lateinit var sleepLogRepository: SleepLogRepository
+
+    @MockBean
+    private lateinit var userRepository: UserRepository
     
 
     @Test
@@ -48,17 +54,18 @@ class SleepsControllerTest {
 
     @Test
     fun `should create new sleep successfully`() {
-        var day = LocalDate.of(2023, 1, 1)
-        `when`(sleepRepository.save(any(Sleep::class.java))).thenAnswer { it.arguments[0] }
+        `when`(userRepository.findById(any())).thenReturn(Optional.of(User(1L, "User", LocalDateTime.now(), LocalDateTime.now())))
+        `when`(sleepLogRepository.save(any(SleepLog::class.java))).thenAnswer { it.arguments[0] }
         mockMvc.perform(
             post("/api/v1/sleeps")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
                     {
+                        "userId": "1", 
                         "day": "2023-01-01", 
-                        "startAt": "2023-01-01 22:00:00", 
-                        "endAt": "2023-01-02 08:01:00",
+                        "startAt": "2023-01-01T22:00:00", 
+                        "endAt": "2023-01-02T08:01:00",
                         "mood": "GOOD"
                     }
                 """.trimIndent()
@@ -70,6 +77,4 @@ class SleepsControllerTest {
             .andExpect(jsonPath("$.totalSleep").value("10 h 1 min"))
             .andExpect(jsonPath("$.mood").value("Good"))
     }
-
-
 }
