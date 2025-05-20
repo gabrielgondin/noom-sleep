@@ -17,21 +17,29 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Optional
+import com.noom.interview.fullstack.sleep.domain.sleep.SleepAggregationView
+import com.noom.interview.fullstack.sleep.domain.sleep.SleepAggregationViewRepository
+import java.time.LocalTime
 
 @SpringBootTest
 @ActiveProfiles(UNIT_TEST_PROFILE)
 @AutoConfigureMockMvc
-class SleepsControllerTest {
+class SleepLogsControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @MockBean
     private lateinit var sleepLogRepository: SleepLogRepository
+
+    @MockBean
+    private lateinit var sleepAggregationViewRepository: SleepAggregationViewRepository
 
     @MockBean
     private lateinit var userRepository: UserRepository
@@ -76,5 +84,55 @@ class SleepsControllerTest {
             .andExpect(jsonPath("$.endAt").value("08:01 am"))
             .andExpect(jsonPath("$.totalSleep").value("10 h 1 min"))
             .andExpect(jsonPath("$.mood").value("Good"))
+    }
+
+
+    @Test
+    fun `should return latest sleep log successfully`() {
+        val user = User(1L, "User", LocalDateTime.now(), LocalDateTime.now())
+        val sleepLog = SleepLog(
+            1L,
+            user,
+            LocalDate.of(2023, 1, 1),
+            SleepLog.MoodMorning.GOOD,
+            LocalDateTime.of(2023, 1, 1, 22, 0),
+            LocalDateTime.of(2023, 1, 2, 8, 1),
+            601
+        )
+        `when`(userRepository.findById(any())).thenReturn(Optional.of(user))
+        `when`(sleepLogRepository.findFirstByUserIdOrderByDayDesc(1L)).thenReturn(sleepLog)
+
+        mockMvc.perform(
+            get("/api/v1/sleeps/1/latest")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.startAt").value("10:00 pm"))
+            .andExpect(jsonPath("$.endAt").value("08:01 am"))
+            .andExpect(jsonPath("$.totalSleep").value("10 h 1 min"))
+            .andExpect(jsonPath("$.mood").value("Good"))
+    }
+
+    @Test
+    fun `should return average sleep successfully`() {
+        val user = User(1L, "User", LocalDateTime.now(), LocalDateTime.now())
+        val sleepAverage = SleepAggregationView(1L,
+            LocalTime.of(22, 1, 2),
+            LocalTime.of(6, 1, 2),
+            480L, 2,0,1)
+        `when`(userRepository.findById(any())).thenReturn(Optional.of(user))
+        `when`(sleepAggregationViewRepository.findAveragesByUserIdAndFromDay(1L, LocalDate.now().minusDays(30L))).thenReturn(sleepAverage)
+
+        mockMvc.perform(
+            get("/api/v1/sleeps/1/averages")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.averageStartTime").value("22:01:02"))
+            .andExpect(jsonPath("$.averageEndTime").value("06:01:02"))
+            .andExpect(jsonPath("$.startAt").exists())
+            .andExpect(jsonPath("$.endAt").exists())
+            .andExpect(jsonPath("$.averageSleepDuration").value("0 h 16 min"))
+            .andExpect(jsonPath("$.moodCount['GOOD']").value(2))
     }
 }
