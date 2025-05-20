@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 class DatabaseConfig {
 
     @Autowired
-    private lateinit var userRepository: UserRepository
+    protected lateinit var userRepository: UserRepository
 
     @BeforeEach
     fun setup() {

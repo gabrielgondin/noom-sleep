@@ -30,4 +30,39 @@ class SleepRepositoryImplTest @Autowired constructor(
         assert(sleepFound.get().day == sleepLog.day)
         assert(sleepFound.get().mood == sleepLog.mood)
     }
+
+    @Test
+    fun `should find latest sleep log by user id`() {
+        val yesterday = LocalDate.now().minusDays(1)
+        val today = LocalDate.now()
+        val user = userRepository.findById(1L).get();
+        val oldSleepLog = SleepLog(
+            user = user,
+            day = yesterday,
+            mood = SleepLog.MoodMorning.OK,
+            startAt = LocalDateTime.of(yesterday, LocalTime.of(22, 0)),
+            endAt = LocalDateTime.of(today, LocalTime.of(6, 0)),
+            totalMinutes = 480L
+        )
+
+        val latestSleepLog = SleepLog(
+            user = user,
+            day = today,
+            mood = SleepLog.MoodMorning.GOOD,
+            startAt = LocalDateTime.of(today, LocalTime.of(23, 0)),
+            endAt = LocalDateTime.of(today.plusDays(1), LocalTime.of(7, 0)),
+            totalMinutes = 480L
+        )
+
+        sleepLogRepository.save(oldSleepLog)
+        sleepLogRepository.save(latestSleepLog)
+
+        val latest = sleepLogRepository.findFirstByUserIdOrderByDayDesc(user.id!!)
+
+        assert(latest != null)
+        assert(latest?.day == today)
+        assert(latest?.id == latestSleepLog.id)
+    }
+
+
 }

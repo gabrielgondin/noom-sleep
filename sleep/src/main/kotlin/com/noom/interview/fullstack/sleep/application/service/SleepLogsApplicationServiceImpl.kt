@@ -43,6 +43,11 @@ class SleepLogsApplicationServiceImpl(
         }
     }
 
+    override fun retrieveLatestSleepLog(userId: Long): SleepLog? {
+
+        return sleepLogRepository.findFirstByUserIdOrderByDayDesc(this.getUser(userId).id!!)
+    }
+
     private fun getUser(userId: Long): User {
         return userRepository.findById(userId)
             .orElseThrow { IllegalArgumentException("User with id: $userId not found") }

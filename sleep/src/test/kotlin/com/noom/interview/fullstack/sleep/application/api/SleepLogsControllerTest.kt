@@ -17,8 +17,10 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Optional
 
@@ -70,6 +72,33 @@ class SleepsControllerTest {
                     }
                 """.trimIndent()
                 )
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.startAt").value("10:00 pm"))
+            .andExpect(jsonPath("$.endAt").value("08:01 am"))
+            .andExpect(jsonPath("$.totalSleep").value("10 h 1 min"))
+            .andExpect(jsonPath("$.mood").value("Good"))
+    }
+
+
+    @Test
+    fun `should return latest sleep log successfully`() {
+        val user = User(1L, "User", LocalDateTime.now(), LocalDateTime.now())
+        val sleepLog = SleepLog(
+            1L,
+            user,
+            LocalDate.of(2023, 1, 1),
+            SleepLog.MoodMorning.GOOD,
+            LocalDateTime.of(2023, 1, 1, 22, 0),
+            LocalDateTime.of(2023, 1, 2, 8, 1),
+            601
+        )
+        `when`(userRepository.findById(any())).thenReturn(Optional.of(user))
+        `when`(sleepLogRepository.findFirstByUserIdOrderByDayDesc(1L)).thenReturn(sleepLog)
+
+        mockMvc.perform(
+            get("/api/v1/sleeps/1/latest")
+                .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.startAt").value("10:00 pm"))
