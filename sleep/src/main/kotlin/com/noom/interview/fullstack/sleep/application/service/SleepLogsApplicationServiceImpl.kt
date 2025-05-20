@@ -6,10 +6,12 @@ import com.noom.interview.fullstack.sleep.domain.sleep.*
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class SleepLogsApplicationServiceImpl(
     private val sleepLogRepository: SleepLogRepository,
+    private val sleepAggregationViewRepository: SleepAggregationViewRepository,
     private val sleepLogService: SleepLogService,
     private val userRepository: UserRepository
 ) : SleepLogsApplicationService {
@@ -44,8 +46,16 @@ class SleepLogsApplicationServiceImpl(
     }
 
     override fun retrieveLatestSleepLog(userId: Long): SleepLog? {
-
+        logger.debug("Retrieving latest sleep for user: $userId")
         return sleepLogRepository.findFirstByUserIdOrderByDayDesc(this.getUser(userId).id!!)
+    }
+
+    override fun retrieveSleepAverage(
+        userId: Long,
+        fromDay: LocalDate
+    ): SleepAggregationView? {
+        logger.debug("Retrieving sleep average for user: $userId, from day: $fromDay")
+        return sleepAggregationViewRepository.findAveragesByUserIdAndFromDay(this.getUser(userId).id!!, fromDay)
     }
 
     private fun getUser(userId: Long): User {

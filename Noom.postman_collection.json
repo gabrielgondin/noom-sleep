@@ -1,0 +1,67 @@
+{
+	"info": {
+		"_postman_id": "ad46b999-b5b5-4821-8790-a401039abae7",
+		"name": "Noom",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "4229969"
+	},
+	"item": [
+		{
+			"name": "save sleep log",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": 1,\r\n    \"day\": \"2025-05-12\", \r\n    \"startAt\": \"2025-05-13T03:00:00\", \r\n    \"endAt\": \"2025-05-13T06:25:00\",\r\n    \"mood\": \"OK\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/v1/sleeps"
+			},
+			"response": []
+		},
+		{
+			"name": "latest sleep log",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/api/v1/sleeps/1/latest"
+			},
+			"response": []
+		},
+		{
+			"name": "average sleep",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/sleeps/1/averages",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"sleeps",
+						"1",
+						"averages"
+					],
+					"query": [
+						{
+							"key": "startFrom",
+							"value": "2023-03-01",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
